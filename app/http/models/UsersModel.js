@@ -16,8 +16,8 @@ class UserModel{
   async register(data){
     // res.send(data);
     // console.log(data);
-    let query = "insert into users(name,email,mobile,password,salt,image) values(?,?,?,?,?,?,?,?,?)";
-    return await promise_connection(query,[data.name,data.email,data.mobile,data.password,data.salt,data.image]);
+    let query = "insert into users(name,email,mobile,password,salt,profile_pic) values(?,?,?,?,?,?)";
+    return await promise_connection(query,[data.name,data.email,data.mobile,data.password,data.salt,data.profile_pic]);
   }
 
   async getUser(data){
@@ -38,9 +38,11 @@ class UserModel{
   // }
 
   async updateUser(data,user){
+
+    // return res.status(403).send(data);
      
-      let query = "update users set name=?,mobile=?image=?, where id=?";
-      return await promise_connection(query,[data.name,data.email,data.mobile,data.password,data.salt,data.image,user.id]);
+      let query = "update users set name=?,mobile=?,profile_pic=?,where id=?";
+      return await promise_connection(query,[data.name,data.mobile,data.profile_pic,user.id]);
   }
 
 

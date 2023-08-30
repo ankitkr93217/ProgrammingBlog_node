@@ -15,6 +15,7 @@ class AuthController{
 
             // Get user input
             const { name,email,password} = req.body;
+            const {profile_pic} = req.files;
             // Validate user input
             if (!(email && password && name)) {
                 const resData={
@@ -27,7 +28,9 @@ class AuthController{
 
             let oldUser = await UserModel.getUser(req.body);
         //    return res.status(400).send(oldUser.length);
-            if (oldUser.length===0) {
+            if (oldUser.length === 0) {
+                
+            }else{
                 const resData={
                     status:false,
                     msg:'User Already Exist. Please Login',
@@ -35,8 +38,7 @@ class AuthController{
                 }
                 return res.status(409).send(resData);
             }
-            // return res.status(403).send('aaaaaaaaaaaaaaaaaaaa');
-
+ 
             const salt =await crypto.randomBytes(16).toString('base64');
             const hash =  await crypto.createHmac('sha256', salt).update(req.body.password).digest('hex');
             req.body.salt=salt;
@@ -44,33 +46,41 @@ class AuthController{
  
              // for profile pic
             let profileImage='';
- 
-            if(profile){
- 
-                 let imagePath= PUBLIC_URL+'post/profile/';
+           
+             if(profile_pic){
+               
+                 let imagePath= PUBLIC_URL+'profile/';
+                //  return res.status(403).send(imagePath);
                  // let storedImage= await this.uploadFiles('s','thumbnail',req.files,imagePath);
-                 let profile='profile';
-                 let reqFile = req.files.profile;
-                 const extensionName = path.extname(reqFile.name); // fetch the file extension
-                 const allowedExtension = ['.png','.jpg','.jpeg'];
+                 let profile_pic='profile_pic';
+                 let reqFile = req.files.profile_pic;
+                 
+                //  const extensionName = path.extname(reqFile.name); // fetch the file extension
+                 const extensionName = reqFile.name.split(".")[1]; // fetch the file extension
+                 const allowedExtension = ['png','jpg','jpeg'];
                  
                  if(!allowedExtension.includes(extensionName)){
                      return res.status(422).send("Invalid Image");
                  }
      
                  const uploadingPaths = imagePath + Date.now()+'-'+reqFile.name;
+                //  return res.status(403).send(uploadingPaths);
                  reqFile.mv(uploadingPaths, (err) => {
                    if (err) {
-                     return res.status(500).send(err);
+                    // return res.status(403).send(uploadingPaths);
+                     return res.status(500).send({ msg:' error h.',
+                     error:err});
                    }
                  });
                  profileImage =uploadingPaths;
-     
+                //  return res.status(403).send(req.files);
  
             } 
 
-            req.body.image=profileImage;
-            // insert data
+            req.body.profile_pic=profileImage;
+            // return res.status(403).send(req.body);
+ 
+             // insert data
             let data = await UserModel.register(req.body);
 
             const user = {
@@ -89,7 +99,7 @@ class AuthController{
 
             const resData={
                 status:true,
-                msg:'You are Successfully Logged in.',
+                msg:'You are Successfully Registered and Logged in.',
                 user:user,
                 token:token,
                  
@@ -194,7 +204,7 @@ class AuthController{
 
             // Get user input
             const {name,mobile} = req.body;
-            const {image} = req.files;
+            const {profile_pic} = req.files;
 
             // Validate user input
             if (!(name && mobile && image)) {
@@ -222,12 +232,12 @@ class AuthController{
 
             let profileImage='';
  
-            if(profile){
+            if(profile_pic){
 
                 let imagePath= PUBLIC_URL+'post/profile/';
                 // let storedImage= await this.uploadFiles('s','thumbnail',req.files,imagePath);
-                let profile='profile';
-                let reqFile = req.files.profile;
+                let profile_pic='profile_pic';
+                let reqFile = req.files.profile_pic;
                 const extensionName = path.extname(reqFile.name); // fetch the file extension
                 const allowedExtension = ['.png','.jpg','.jpeg'];
                 
@@ -245,13 +255,13 @@ class AuthController{
     
 
             }else{
-                profileImage = oldUser.image;//with path
+                profileImage = oldUser.profile_pic;//with path
             }
      
             let data = {
                 name:name,
                 mobile:mobile,
-                profile:profileImage
+                profile_pic:profileImage
             };
 
             let st = await UserModel.updateUser(data , req.body.user);
