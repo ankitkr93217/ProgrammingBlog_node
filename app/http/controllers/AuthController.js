@@ -1,6 +1,7 @@
 const UserModel  = require("../models/UsersModel");
 const crypto = require('crypto');//createHmac,randomBytes
 var jwt = require('jsonwebtoken');
+const path = require("path");
  
 
 class AuthController{
@@ -11,6 +12,7 @@ class AuthController{
 
         try {
             // return res.status(403).send(req.files);
+            // return res.status(403).send(req.body);
 
 
             // Get user input
@@ -27,7 +29,7 @@ class AuthController{
             }
 
             let oldUser = await UserModel.getUser(req.body);
-        //    return res.status(400).send(oldUser.length);
+
             if (oldUser.length === 0) {
                 
             }else{
@@ -50,36 +52,33 @@ class AuthController{
              if(profile_pic){
                
                  let imagePath= PUBLIC_URL+'profile/';
-                //  return res.status(403).send(imagePath);
-                 // let storedImage= await this.uploadFiles('s','thumbnail',req.files,imagePath);
+                  // let storedImage= await this.uploadFiles('s','thumbnail',req.files,imagePath);
                  let profile_pic='profile_pic';
                  let reqFile = req.files.profile_pic;
                  
-                //  const extensionName = path.extname(reqFile.name); // fetch the file extension
-                 const extensionName = reqFile.name.split(".")[1]; // fetch the file extension
-                 const allowedExtension = ['png','jpg','jpeg'];
+                 const extensionName = path.extname(reqFile.name); // fetch the file extension
+                 const allowedExtension = ['.png','.jpg','.jpeg'];
+                //  const extensionName = reqFile.name.split(".")[1]; // fetch the file extension
+                //  const allowedExtension = ['png','jpg','jpeg'];
                  
                  if(!allowedExtension.includes(extensionName)){
                      return res.status(422).send("Invalid Image");
                  }
      
                  const uploadingPaths = imagePath + Date.now()+'-'+reqFile.name;
-                //  return res.status(403).send(uploadingPaths);
+                
                  reqFile.mv(uploadingPaths, (err) => {
                    if (err) {
-                    // return res.status(403).send(uploadingPaths);
-                     return res.status(500).send({ msg:' error h.',
+                      return res.status(500).send({ msg:' error h.',
                      error:err});
                    }
                  });
                  profileImage =uploadingPaths;
-                //  return res.status(403).send(req.files);
- 
+                 
             } 
 
             req.body.profile_pic=profileImage;
-            // return res.status(403).send(req.body);
- 
+  
              // insert data
             let data = await UserModel.register(req.body);
 

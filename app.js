@@ -62,8 +62,10 @@ if (process.env.NODE_ENV !== "production") {
 
 //for root directory path globally
 global.URL= path.resolve(__dirname)+'/';
-global.PUBLIC_URL= path.resolve(__dirname)+'/app/public/';
-  
+//global.PUBLIC_URL=path.normalize(path.resolve(__dirname)+'/app/public/');
+global.PUBLIC_URL= (path.join(__dirname,'/app/public/')).replace(/\\/g, '/');
+//console.log(PUBLIC_URL);
+   
 class IndexController{
 
   constructor() { 
