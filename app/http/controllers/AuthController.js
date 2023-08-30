@@ -41,8 +41,36 @@ class AuthController{
             const hash =  await crypto.createHmac('sha256', salt).update(req.body.password).digest('hex');
             req.body.salt=salt;
             req.body.password=hash;
-            req.body.image=req.file.path;
+ 
+             // for profile pic
+            let profileImage='';
+ 
+            if(profile){
+ 
+                 let imagePath= PUBLIC_URL+'post/profile/';
+                 // let storedImage= await this.uploadFiles('s','thumbnail',req.files,imagePath);
+                 let profile='profile';
+                 let reqFile = req.files.profile;
+                 const extensionName = path.extname(reqFile.name); // fetch the file extension
+                 const allowedExtension = ['.png','.jpg','.jpeg'];
+                 
+                 if(!allowedExtension.includes(extensionName)){
+                     return res.status(422).send("Invalid Image");
+                 }
+     
+                 const uploadingPaths = imagePath + Date.now()+'-'+reqFile.name;
+                 reqFile.mv(uploadingPaths, (err) => {
+                   if (err) {
+                     return res.status(500).send(err);
+                   }
+                 });
+                 profileImage =uploadingPaths;
+     
+ 
+            } 
 
+            req.body.image=profileImage;
+            // insert data
             let data = await UserModel.register(req.body);
 
             const user = {
@@ -57,11 +85,14 @@ class AuthController{
             // user.token = token;
             // console.log(data,user);
 
+           
+
             const resData={
                 status:true,
                 msg:'You are Successfully Logged in.',
                 user:user,
-                token:token
+                token:token,
+                 
             }
             
             return res.status(403).send(resData);
@@ -162,7 +193,8 @@ class AuthController{
         try{ 
 
             // Get user input
-            const {name,mobile,image} = req.body;
+            const {name,mobile} = req.body;
+            const {image} = req.files;
 
             // Validate user input
             if (!(name && mobile && image)) {
@@ -187,25 +219,30 @@ class AuthController{
             } 
 
             oldUser=oldUser[0];
+
+            let profileImage='';
  
-            if(image){
+            if(profile){
 
-                // if (err) {
-                //     return res.status(400).send({ message: err.message })
-                // }
-
-                profileImage =  req.file.path;
-        
+                let imagePath= PUBLIC_URL+'post/profile/';
+                // let storedImage= await this.uploadFiles('s','thumbnail',req.files,imagePath);
+                let profile='profile';
+                let reqFile = req.files.profile;
+                const extensionName = path.extname(reqFile.name); // fetch the file extension
+                const allowedExtension = ['.png','.jpg','.jpeg'];
                 
-                // const file = req.file;
-                // res.status(200).send({
-                //     filename: file.filename,
-                //     mimetype: file.mimetype,
-                //     originalname: file.originalname,
-                //     size: file.size,
-                //     fieldname: file.fieldname,
-                //     path:file.path
-                // })
+                if(!allowedExtension.includes(extensionName)){
+                    return res.status(422).send("Invalid Image");
+                }
+    
+                const uploadingPaths = imagePath + Date.now()+'-'+reqFile.name;
+                reqFile.mv(uploadingPaths, (err) => {
+                  if (err) {
+                    return res.status(500).send(err);
+                  }
+                });
+                profileImage =uploadingPaths;
+    
 
             }else{
                 profileImage = oldUser.image;//with path
@@ -214,7 +251,7 @@ class AuthController{
             let data = {
                 name:name,
                 mobile:mobile,
-                image:profileImage
+                profile:profileImage
             };
 
             let st = await UserModel.updateUser(data , req.body.user);

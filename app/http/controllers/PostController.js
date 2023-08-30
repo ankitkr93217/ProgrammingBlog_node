@@ -82,7 +82,7 @@ class PostController{
                 title:req.body.title,
                 sub_title:req.body.sub_title, // sanitize: convert email to lowercase   .toLowerCase()
                 desc:req.body.desc,
-                thumbnail:'xxxxx',
+                thumbnail:paths,
                 created_by:req.user.id
             };
             // res.send(req.user);
